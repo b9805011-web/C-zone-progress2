@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>C區 立面工程進度看板</title>
+    <style>
+        body {
+            font-family: "Microsoft JhengHei", Arial, sans-serif;
+            background-color: #2c3e50; /* 深色背景讓圖面更明顯 */
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        .image-container {
+            position: relative;
+            display: inline-block;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            max-width: 100%;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+        }
+        
+        /* 
+           ===== 調整熱區框線 =====
+           已經將 border 設為 transparent (透明)，隱藏紅色虛線。
+           你可以將 'transparent' 改回 'red' 來暫時顯示框線以便確認對位。
+        */
+        .hotspot {
+            position: absolute;
+            cursor: pointer;
+            border: 2px solid transparent; /* 已隱藏 */
+            background-color: rgba(255, 255, 255, 0.0);
+            transition: all 0.2s;
+            /* 將高度設為 100%，蓋住整戶的立面 */
+            height: 100%;
+        }
+        .hotspot:hover {
+            /* background-color: rgba(255, 215, 0, 0.35); /* 游標滑過時顯示半透明黃色 */
+            border: 2px solid #b8ac7c00;
+        }
+
+        /* 資訊浮水印 (Tooltip) 樣式 */
+        .tooltip {
+            position: absolute;
+            display: none;
+            background-color: rgba(20, 20, 20, 0.95);
+            color: #f8fafc;
+            padding: 15px 20px;
+            border-radius: 8px;
+            border: 1px solid #475569;
+            pointer-events: none; 
+            z-index: 100;
+            text-align: left;
+            min-width: 220px;
+            white-space: pre-line; /* 讓你在資料區手打的換行直接生效 */
+        }
+        .tooltip h3 {
+            margin: 0 0 10px 0;
+            color: #38bdf8;
+            border-bottom: 1px solid #475569;
+            padding-bottom: 5px;
+        }
+        .completed { color: #4ade80; font-weight: bold; margin-top: 10px; }
+        .pending { color: #facc15; font-weight: bold; margin-top: 10px; }
+        .content-text { margin-top: 5px; font-size: 15px; line-height: 1.6; }
+    </style>
+</head>
+<body>
+
+    <h2>C區 立面工程進度看板 (C1~C10)</h2>
+
+    <div class="image-container">
+        <!-- ★ 請將 src 替換成你的圖檔名稱，例如 src="zone_elevations.png" -->
+        <img src="snipaste_2026-05-04_15-46-23.png" alt="C區建案立面圖" id="projectImage">
+        
+        <!-- 
+             ★ 重新抓取的 C1 到 C10 比例 ★
+             依據 image_2.png 從左到右的建築單元邊界劃分。
+        -->
+
+       
+ <div class="hotspot" style="top: 0%; left: 0%;   width: 18%;" data-unit="C1"></div>
+<div class="hotspot" style="top: 0%; left: 18%;  width: 8%;"  data-unit="C2"></div>
+<div class="hotspot" style="top: 0%; left: 26%;  width: 7%;"  data-unit="C3"></div>
+<div class="hotspot" style="top: 0%; left: 33%;  width: 8%;"  data-unit="C4"></div>
+<div class="hotspot" style="top: 0%; left: 41%;  width: 7%;"  data-unit="C5"></div>
+<div class="hotspot" style="top: 0%; left: 48%;  width: 8%;"  data-unit="C6"></div>
+<div class="hotspot" style="top: 0%; left: 56%;  width: 7%;"  data-unit="C7"></div>
+<div class="hotspot" style="top: 0%; left: 60%;  width: 6%;"  data-unit="C8"></div>
+<div class="hotspot" style="top: 0%; left: 66%;  width: 12%;"  data-unit="C9"></div>
+<div class="hotspot" style="top: 0%; left: 78%;  width: 6%;"  data-unit="C10"></div>
+<div class="hotspot" style="top: 0%; left: 84%;  width: 16%;" data-unit="C11"></div>
+
+        <!-- 浮動資訊框 -->
+        <div id="tooltip" class="tooltip"></div>
+    </div>
+
+    <script>
+        // =====================================================================
+        // ★ 手動輸入區 (手KEY區) ★
+        // 請在兩個反引號 ( ` ) 之間，直接換行打字即可。不需要加任何程式碼標籤。
+        // =====================================================================
+        const progressData = {
+            "C1": {
+                completed: `
+                    1. 基礎土方開挖
+                    2. 基礎版PC澆置
+                    3. 基礎鋼筋綁紮
+                    4. 鋼構吊裝
+                    5. 水電管預留
+                `,
+                pending: `
+                    1. 門窗框安裝 (預計 O/OO 進場)
+                    2. 屋頂版吊裝 (預計 O/OO 進場)
+                    3. 化錨施工+背填 (預計 O/OO 進場)
+                    3. 泥作施工 (預計 O/OO 進場)
+                `
+            },
+            "C2": { completed: `尚未填寫`, pending: `尚未填寫` },
+            "C3": { completed: `尚未填寫`, pending: `尚未填寫` },
+            "C4": { completed: `尚未填寫`, pending: `尚未填寫` },
+            "C5": { completed: `尚未填寫`, pending: `尚未填寫` },
+            "C6": { completed: `尚未填寫`, pending: `尚未填寫` },
+            "C7": { completed: `尚未填寫`, pending: `尚未填寫` },
+            "C8": { completed: `尚未填寫`, pending: `尚未填寫` },
+            "C9": { completed: `尚未填寫`, pending: `尚未填寫` },
+            "C10": { completed: `尚未填寫`, pending: `尚未填寫` },
+            "C11": { completed: `尚未填寫`, pending: `尚未填寫` }
+        };
+        // =====================================================================
+
+        const hotspots = document.querySelectorAll('.hotspot');
+        const tooltip = document.getElementById('tooltip');
+
+        hotspots.forEach(spot => {
+            spot.addEventListener('mouseenter', function(e) {
+                const unitId = this.getAttribute('data-unit');
+                const data = progressData[unitId];
+
+                if (data) {
+                    let htmlContent = `<h3>${unitId} 戶 立面進度</h3>`;
+                    
+                    htmlContent += `<div class="completed">✅ 已完成：</div>`;
+                    htmlContent += `<div class="content-text">${data.completed.trim()}</div>`;
+
+                    htmlContent += `<div class="pending">⏳ 待完成 (排程)：</div>`;
+                    htmlContent += `<div class="content-text">${data.pending.trim()}</div>`;
+
+                    tooltip.innerHTML = htmlContent;
+                    tooltip.style.display = 'block';
+                }
+            });
+
+            spot.addEventListener('mousemove', function(e) {
+                tooltip.style.left = (e.pageX + 15) + 'px';
+                tooltip.style.top = (e.pageY + 15) + 'px';
+            });
+
+            spot.addEventListener('mouseleave', function() {
+                tooltip.style.display = 'none';
+            });
+        });
+    </script>
+</body>
+</html>
